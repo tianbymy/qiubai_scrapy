@@ -8,7 +8,17 @@
 import scrapy
 
 
-class QiubaiScrapyItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class QiubaiItem(scrapy.Item):
+    # uuid
+    uuid = scrapy.Field()
+    # 作者
+    name = scrapy.Field()
+    avator = scrapy.Field()
+    gender = scrapy.Field()
+    age = scrapy.Field()
+    # 内容
+    content = scrapy.Field()
+    thumb = scrapy.Field()
+    # 其他
+    vote = scrapy.Field()
+    comment = scrapy.Field()

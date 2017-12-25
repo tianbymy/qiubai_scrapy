@@ -6,7 +6,8 @@
 # http://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-
+from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
+import random
 
 class QiubaiScrapySpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -54,3 +55,19 @@ class QiubaiScrapySpiderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+class QiubaiUserAgentMiddleware(UserAgentMiddleware):
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        o = cls(crawler.settings['QIUBAI_USER_AGENTS'])
+        crawler.signals.connect(o.spider_opened, signal=signals.spider_opened)
+        return o
+
+    def spider_opened(self, spider):
+        self.user_agent = getattr(spider, 'user_agent', self.user_agent)
+
+    def process_request(self, request, spider):
+        user_agent = random.choice(self.user_agent)
+        if self.user_agent:
+            request.headers.setdefault(b'User-Agent', self.user_agent)
