@@ -5,7 +5,9 @@ from qiubai_scrapy.items import QiubaiItem
 class QiubaiSpider(scrapy.Spider):
     name = 'qiubai'
     allowed_domains = ['qiushibaike.com']
-    start_urls = ['https://www.qiushibaike.com/text/']
+    host = 'https://www.qiushibaike.com'
+    protocol = 'https:'
+    start_urls = ['https://www.qiushibaike.com']
 
     def parse(self, response):
         # 段子
@@ -18,13 +20,18 @@ class QiubaiSpider(scrapy.Spider):
             name = author_block.xpath('a[2]/h2/text()').extract_first()
             avatar = author_block.xpath('a[1]/img/@src').extract_first()
 
+            # 匿名
             if name is None:
                 name = author_block.xpath('span[2]/h2/text()').extract_first()
-            if name is not None:
-                name = name.strip('\n')
-
             if avatar is None:
                 avatar = author_block.xpath('span[1]/img/@src').extract_first()
+
+            if name is not None:
+                name = name.strip('\n')
+            if avatar is not None and avatar.startswith(self.protocol) is not True:
+                avatar = self.protocol + avatar
+
+
 
 
             if author_block.xpath('div[@class="articleGender manIcon"]').extract_first() is not None:
@@ -44,6 +51,10 @@ class QiubaiSpider(scrapy.Spider):
             thumb_block = block.xpath('div[@class="thumb"]')
             thumb = thumb_block.xpath('a/@src').extract_first()
 
+            if thumb is not None and thumb.startswith(self.protocol) is not True:
+                thumb = self.protocol + thumb
+
+
             # 其他
             stats_block = block.xpath('div[@class="stats"]')
             vote = stats_block.xpath('span[@class="stats-vote"]/i/text()').extract_first()
@@ -62,6 +73,7 @@ class QiubaiSpider(scrapy.Spider):
             item['comment'] = comment
             yield item
 
-            # 下一页
-            # next_page = response.xpath('//ul[@class="pagination"]/li[last()]/a')
-            # yield response.follow(next_page, callback=self.parse)
+        # 下一页
+        next_page = response.xpath('//ul[@class="pagination"]/li[last()]/a')
+        if next_page.extract_first() is not None:
+            yield response.follow(next_page[0], callback=self.parse)
