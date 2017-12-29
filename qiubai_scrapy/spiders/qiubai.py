@@ -16,7 +16,7 @@ class QiubaiSpider(scrapy.Spider):
             # 作者
             author_block = block.xpath('div[@class="author clearfix"]')
             name = author_block.xpath('a[2]/h2/text()').extract_first().strip('\n')
-            avator = author_block.xpath('a[1]/img/@src').extract_first()
+            avatar = author_block.xpath('a[1]/img/@src').extract_first()
             if author_block.xpath('div[@class="articleGender manIcon"]').extract_first() is not None:
                 gender = 'man'
                 age = author_block.xpath('div[@class="articleGender manIcon"]/text()').extract_first()
@@ -43,7 +43,7 @@ class QiubaiSpider(scrapy.Spider):
             item = QiubaiItem()
             item['uuid'] = uuid
             item['name'] = name
-            item['avator'] = avator
+            item['avatar'] = avatar
             item['gender'] = gender
             item['age'] = age
             item['content'] = content

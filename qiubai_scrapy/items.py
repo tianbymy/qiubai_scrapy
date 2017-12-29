@@ -13,7 +13,7 @@ class QiubaiItem(scrapy.Item):
     uuid = scrapy.Field()
     # 作者
     name = scrapy.Field()
-    avator = scrapy.Field()
+    avatar = scrapy.Field()
     gender = scrapy.Field()
     age = scrapy.Field()
     # 内容
