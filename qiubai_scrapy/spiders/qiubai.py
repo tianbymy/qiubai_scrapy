@@ -1,15 +1,37 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from qiubai_scrapy.items import QiubaiItem
+from scrapy.http import Request
+import logging
 
 class QiubaiSpider(scrapy.Spider):
     name = 'qiubai'
     allowed_domains = ['qiushibaike.com']
     host = 'https://www.qiushibaike.com'
     protocol = 'https:'
-    start_urls = ['https://www.qiushibaike.com']
+    start_urls = [
+        '',             # 主页
+        'hot/',          # 24小时
+        'imgrank/',      # 热图
+        'text/',         # 文字
+        'history/',      # 穿越
+        'pic/',          # 糗图
+        'textnew/'       # 新鲜
+    ]
+    logging.getLogger('requests').setLevel(logging.WARNING)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+        datefmt='%a, %d %b %Y %H:%M:%S',
+        filename='qiubai.log',
+        filemode='w')
+
+    def start_requests(self):
+        for type in self.start_urls:
+            yield Request(url=self.host + '/%s' % type, callback=self.parse)
 
     def parse(self, response):
+        logging.debug('request url:------>' + response.url)
         # 段子
         for block in response.xpath('//div[@class="col1"]/div'):
             # uuid
@@ -74,6 +96,8 @@ class QiubaiSpider(scrapy.Spider):
             yield item
 
         # 下一页
-        next_page = response.xpath('//ul[@class="pagination"]/li[last()]/a')
-        if next_page.extract_first() is not None:
-            yield response.follow(next_page[0], callback=self.parse)
+        next_page = response.xpath('//ul[@class="pagination"]/li[last()]/a/@href').extract_first()
+        if next_page is not None:
+            url = self.host + '%s' % next_page
+            logging.debug(' next page:---------->' + url)
+            yield Request(url=url, callback=self.parse)

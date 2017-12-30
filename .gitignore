@@ -100,3 +100,6 @@ ENV/
 
 # macos
 .DS_Store
+
+# My
+my_settings.py
